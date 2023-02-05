@@ -1,11 +1,9 @@
 use std::io;
 use  std::f64::consts;
 use rand::Rng;
-use ndarray::{arr1,arr2};
 use ndarray::{Axis,Array, Array2,ArrayView1, ArrayView2, Slice};
 use ndarray_rand::RandomExt;
 use ndarray_rand::rand_distr::Uniform;
-
 use csv::{ReaderBuilder, WriterBuilder};
 use ndarray_csv::{Array2Reader, Array2Writer};
 use std::error::Error;
@@ -13,13 +11,12 @@ use std::fs::File;
 
 
 
-fn print_type_of<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>())
+fn main() {
+    run_network();   
 }
 
-fn main() {
-    run_network();
-
+fn print_type_of<T>(_: &T) {
+    println!("{}", std::any::type_name::<T>())
 }
 
 fn l1_norm(x: ArrayView2<f64>) -> f64 {
@@ -146,7 +143,6 @@ fn gradient_descent(x:&ndarray::Array2<f64>,y:&ndarray::Array1<i32>, iter:i32, a
 }
 
 fn one_hot(y:&ndarray::Array1<i32>) -> ndarray::Array2<f64>{
-    // let len = x.shape()[0];
     let siz = y.iter().cloned().count();
     let max = itertools::max(y).unwrap();
     let max_usize: usize = *max as usize + 1;
@@ -188,6 +184,9 @@ fn run_network() {
     let train_columns = 10000;
     let test_columns = 141;
 
+    let iterations = 30; // this will result in around 0.5 accuracy
+    let alpha = 0.2;
+
     // use the test data to train because the train to big to load
     let train = read_array_data("/home/benja/projects/rust_2/mnist_test.csv", true, train_columns).unwrap();
     let test = read_array_data("/home/benja/projects/rust_2/test.csv", true, test_columns).unwrap();
@@ -208,7 +207,7 @@ fn run_network() {
     println!("\n{}", &x);
 
 
-    let (w1,b1,w2,b2) = gradient_descent(&x, &y_train, 10, 0.2);
+    let (w1,b1,w2,b2) = gradient_descent(&x, &y_train, iterations, alpha);
 
     let (z1,a1,z2,a2) = foward_prop(&x,&w1,&b1,&w2,&b2);
 
@@ -226,9 +225,4 @@ fn run_network() {
     println!("accuracy  on trained dataset :  {}", &acc);
     println!("accuracy  on test dataset :  {}", &acc_test);
 
-    // let soft_test = arr2(&[[100.0,2.9,4.3], [200.0,3.9,4.3], [1.0,300.9,9.3],[1.0,3.9,400.3],[1.0,7.9,4.3]]);
-    // println!("{}", &soft_test);
-
-    // let ss = softmax(&soft_test);
-    // println!("{}", &ss);
 }
